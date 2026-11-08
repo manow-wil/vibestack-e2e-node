@@ -1,6 +1,7 @@
 const http = require("http");
 const { Client } = require("pg");
 const { createClient } = require("redis");
+const { MongoClient } = require("mongodb");
 const port = process.env.PORT || 3000;
 function json(res, code, obj) {
   res.writeHead(code, { "Content-Type": "application/json" });
@@ -32,6 +33,22 @@ http.createServer(async (req, res) => {
       json(res, 500, { error: e.message });
     } finally {
       rc.quit().catch(() => {});
+    }
+    return;
+  }
+  if (req.url === "/mongo") {
+    const mc = new MongoClient(process.env.MONGO_URL, { serverSelectionTimeoutMS: 5000 });
+    try {
+      await mc.connect();
+      const db = mc.db();
+      const col = db.collection("qa");
+      const ins = await col.insertOne({ qa: "ok-" + Date.now() });
+      const doc = await col.findOne({ _id: ins.insertedId });
+      json(res, 200, { ok: doc.qa, db: db.databaseName });
+    } catch (e) {
+      json(res, 500, { error: e.message });
+    } finally {
+      mc.close().catch(() => {});
     }
     return;
   }
