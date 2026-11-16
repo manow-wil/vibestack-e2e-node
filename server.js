@@ -1,3 +1,4 @@
+const mysql = require("mysql2/promise");
 const http = require("http");
 const { Client } = require("pg");
 const { createClient } = require("redis");
@@ -8,6 +9,19 @@ function json(res, code, obj) {
   res.end(JSON.stringify(obj));
 }
 http.createServer(async (req, res) => {
+  if (req.url === "/mysql") {
+    let c;
+    try {
+      c = await mysql.createConnection(process.env.MYSQL_URL);
+      const [rows] = await c.query("SELECT 1 AS ok");
+      json(res, 200, rows[0]);
+    } catch (e) {
+      json(res, 500, { error: e.message });
+    } finally {
+      if (c) await c.end().catch(() => {});
+    }
+    return;
+  }
   if (req.url === "/db") {
     const c = new Client({ connectionString: process.env.DATABASE_URL });
     try {
