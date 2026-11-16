@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": { "start": "node server.js" },
-  "dependencies": { "mongodb": "^6.10.0", "pg": "^8.11.3", "redis": "^4.7.0" },
+  "dependencies": { "mongodb": "^6.10.0", "pg": "^8.11.3", "redis": "^4.7.0", "mysql2": "^3.11.5" },
   "engines": { "node": ">=18" }
 }
